@@ -44,6 +44,7 @@ public class MainActivityFragment extends Fragment {
     private List<String> fileNameList; // flag file names
     private List<String> quizCountriesList; // countries in current quiz
     private Set<String> regionsSet; // world regions in current quiz
+    private List<Integer> highestScoresList;
     private String correctAnswer; // correct country for the current flag
     private int totalGuesses; // number of guesses made
     private int correctAnswers; // number of correct guesses
@@ -70,6 +71,7 @@ public class MainActivityFragment extends Fragment {
 
         fileNameList = new ArrayList<>();
         quizCountriesList = new ArrayList<>();
+        highestScoresList = new ArrayList<>();
         random = new SecureRandom();
         handler = new Handler();
 
@@ -127,8 +129,35 @@ public class MainActivityFragment extends Fragment {
 
     // update world regions for quiz based on values in SharedPreferences
     public void updateRegions(SharedPreferences sharedPreferences) {
-        regionsSet =
-                sharedPreferences.getStringSet(MainActivity.REGIONS, null);
+        regionsSet = sharedPreferences.getStringSet(MainActivity.REGIONS, null);
+    }
+
+
+    private String ConvertHighestScoresToString(){
+        String result = "";
+
+        for (int i = 0; i < highestScoresList.size(); i++){
+            Integer score = highestScoresList.get(i);
+
+            result = result + score.toString();
+
+            if (i != (highestScoresList.size() - 1)){ // separator will only be added at the end
+                result = result + ",";
+            }
+        }
+
+        return result;
+    }
+
+    private void ConvertStringToHighestScoresList(String input){
+        highestScoresList = new ArrayList<Integer>();
+        String[] pieces = input.split(",");
+
+        for(int i = 0; i < pieces.length; i++){
+            String numberString = pieces[i];
+            int number = Integer.parseInt(numberString);
+            highestScoresList.add(number);
+        }
     }
 
     // set up and start the next quiz
@@ -313,9 +342,18 @@ public class MainActivityFragment extends Fragment {
 
                 // if the user has correctly identified FLAGS_IN_QUIZ flags
                 if (correctAnswers == FLAGS_IN_QUIZ) {
-
-                    int extraGuessesCount =  totalGuesses - correctAnswers;
+                    //calculate the game score
+                    final int extraGuessesCount =  totalGuesses - correctAnswers;
                     final int score = (correctAnswers * 10) - extraGuessesCount;
+
+                    //calculating the highest scores
+                    highestScoresList.add(score);
+                    Collections.sort(highestScoresList);
+                    Collections.reverse(highestScoresList);
+                    while (highestScoresList.size() > 5){
+                        highestScoresList.remove(highestScoresList.size() - 1);
+                    }
+                    // TODO: store the high scores
 
                     // DialogFragment to display quiz stats and start new quiz
                     DialogFragment quizResults =
