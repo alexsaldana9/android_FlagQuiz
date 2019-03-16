@@ -20,6 +20,7 @@ import android.content.res.AssetManager;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -71,9 +72,10 @@ public class MainActivityFragment extends Fragment {
 
         fileNameList = new ArrayList<>();
         quizCountriesList = new ArrayList<>();
-        highestScoresList = new ArrayList<>();
         random = new SecureRandom();
         handler = new Handler();
+
+        updateHighestScores(getDefaultSharedPreferences());
 
         // load the shake animation that's used for incorrect answers
         shakeAnimation = AnimationUtils.loadAnimation(getActivity(),
@@ -111,6 +113,10 @@ public class MainActivityFragment extends Fragment {
         return view; // return the fragment's view for display
     }
 
+    private SharedPreferences getDefaultSharedPreferences() {
+        return PreferenceManager.getDefaultSharedPreferences(MainActivity.context);
+    }
+
     // update guessRows based on value in SharedPreferences
     public void updateGuessRows(SharedPreferences sharedPreferences) {
         // get the number of guess buttons that should be displayed
@@ -132,6 +138,16 @@ public class MainActivityFragment extends Fragment {
         regionsSet = sharedPreferences.getStringSet(MainActivity.REGIONS, null);
     }
 
+    public void updateHighestScores(SharedPreferences sharedPreferences){
+        String highScoresPreferencesString = sharedPreferences.getString(MainActivity.HIGH_SCORES, null);
+        ConvertStringToHighestScoresList(highScoresPreferencesString);
+    }
+
+    private void SaveHighestScores(SharedPreferences sharedPreferences){
+        SharedPreferences.Editor edit = sharedPreferences.edit();
+        String highScoresString = ConvertHighestScoresToString();
+        edit.putString(MainActivity.HIGH_SCORES, highScoresString);
+    }
 
     private String ConvertHighestScoresToString(){
         String result = "";
@@ -151,6 +167,11 @@ public class MainActivityFragment extends Fragment {
 
     private void ConvertStringToHighestScoresList(String input){
         highestScoresList = new ArrayList<Integer>();
+
+        if (input == null){
+            return;
+        }
+
         String[] pieces = input.split(",");
 
         for(int i = 0; i < pieces.length; i++){
@@ -353,7 +374,9 @@ public class MainActivityFragment extends Fragment {
                     while (highestScoresList.size() > 5){
                         highestScoresList.remove(highestScoresList.size() - 1);
                     }
-                    // TODO: store the high scores
+
+                    //Save the highest Scores
+                    SaveHighestScores(getDefaultSharedPreferences());
 
                     // DialogFragment to display quiz stats and start new quiz
                     DialogFragment quizResults =
@@ -368,7 +391,8 @@ public class MainActivityFragment extends Fragment {
                                                     totalGuesses,
                                                     (1000 / (double) totalGuesses),
                                                     firstTryCount,
-                                                    score));
+                                                    score,
+                                                    ConvertHighestScoresToString()));
 
                                     // "Reset Quiz" Button
                                     builder.setPositiveButton(R.string.reset_quiz,

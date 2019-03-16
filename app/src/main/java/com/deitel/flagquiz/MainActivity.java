@@ -22,6 +22,9 @@ public class MainActivity extends AppCompatActivity {
    // keys for reading data from SharedPreferences
    public static final String CHOICES = "pref_numberOfChoices";
    public static final String REGIONS = "pref_regionsToInclude";
+   public static final String HIGH_SCORES = "pref_highScores";
+
+   public static MainActivity context;
 
    private boolean phoneDevice = true; // used to force portrait mode
    private boolean preferencesChanged = true; // did preferences change?
@@ -29,7 +32,10 @@ public class MainActivity extends AppCompatActivity {
    // configure the MainActivity
    @Override
    protected void onCreate(Bundle savedInstanceState) {
+      context = this;
+
       super.onCreate(savedInstanceState);
+
       setContentView(R.layout.activity_main);
       Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
       setSupportActionBar(toolbar);
@@ -60,6 +66,8 @@ public class MainActivity extends AppCompatActivity {
    // called after onCreate completes execution
    @Override
    protected void onStart() {
+      context = this;
+
       super.onStart();
 
       if (preferencesChanged) {
