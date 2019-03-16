@@ -313,6 +313,10 @@ public class MainActivityFragment extends Fragment {
 
                 // if the user has correctly identified FLAGS_IN_QUIZ flags
                 if (correctAnswers == FLAGS_IN_QUIZ) {
+
+                    int extraGuessesCount =  totalGuesses - correctAnswers;
+                    final int score = (correctAnswers * 10) - extraGuessesCount;
+
                     // DialogFragment to display quiz stats and start new quiz
                     DialogFragment quizResults =
                             new DialogFragment() {
@@ -325,7 +329,8 @@ public class MainActivityFragment extends Fragment {
                                             getString(R.string.results,
                                                     totalGuesses,
                                                     (1000 / (double) totalGuesses),
-                                                    firstTryCount));
+                                                    firstTryCount,
+                                                    score));
 
                                     // "Reset Quiz" Button
                                     builder.setPositiveButton(R.string.reset_quiz,
